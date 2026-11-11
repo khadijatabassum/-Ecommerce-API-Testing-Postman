@@ -1,0 +1,236 @@
+{
+  "info": {
+    "_postman_id": "e9360ac3-4616-4a71-9446-a230dae127b6",
+    "name": "Ecom Project API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "6636086",
+    "_collection_link": "https://go.postman.co/collection/6636086-e9360ac3-4616-4a71-9446-a230dae127b6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Login API",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Test: Status code is 2xx\npm.test(\"Status code is 2xx\", function () {\n    pm.response.to.be.success;\n});\n\n// Extract and store the access token\nconst jsonData = pm.response.json();\npm.test(\"Response has accessToken\", function () {\n    pm.expect(jsonData).to.have.property(\"accessToken\");\n});\n\nif (jsonData.accessToken) {\n    pm.environment.set(\"access_token\", jsonData.accessToken);\n    console.log(\"Access token saved to environment variable: access_token\");\n}\n\nif (jsonData.refreshToken) {\n    pm.environment.set(\"refresh_token\", jsonData.refreshToken);\n    console.log(\"Refresh token saved to environment variable: refresh_token\");\n}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n     \"username\": \"emilys\",\r\n    \"password\": \"emilyspass\"\r\n\r\n\r\n\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get User Profile",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// ✅ PASS - Status code is 2xx\npm.test(\"Status code is 2xx\", function () {\n    pm.response.to.be.success;\n});\n\n// ❌ FAIL - City should be Lahore (will fail as actual city is not Lahore)\npm.test(\"City is Lahore\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData.address.city).to.eql(\"Lahore\");\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/auth/me",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "auth",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Single Product",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const jsonData = pm.response.json();\n\n// Test 1: Status code is 2xx\npm.test(\"Status code is 2xx\", function () {\n    pm.response.to.be.success;\n});\n\n// Test 2: availabilityStatus is \"In Stock\"\npm.test(\"availabilityStatus is In Stock\", function () {\n    pm.expect(jsonData.availabilityStatus).to.eql(\"In Stock\");\n});\n\n// Test 3: reviewerName is \"Lucas Gordon\"\npm.test(\"reviewerName is Lucas Gordon\", function () {\n    const review = jsonData.reviews.find(r => r.reviewerName === \"Khadija\");\n    pm.expect(review).to.not.be.undefined;\n    pm.expect(review.reviewerName).to.eql(\"Khadija\");\n});\n\n// Test 4: reviewerEmail is \"lucas.gordon@x.dummyjson.com\"\npm.test(\"reviewerEmail is lucas.gordon@x.dummyjson.com\", function () {\n    const review = jsonData.reviews.find(r => r.reviewerName === \"Lucas Gordon\");\n    pm.expect(review).to.not.be.undefined;\n    pm.expect(review.reviewerEmail).to.eql(\"lucas.gordon@x.dummyjson.com\");\n});\n\n// Test 5: minimumOrderQuantity is 48\npm.test(\"minimumOrderQuantity is 48\", function () {\n    pm.expect(jsonData.minimumOrderQuantity).to.eql(48);\n});\n\n// Extract and store the product ID\npm.test(\"Product ID is present\", function () {\n    pm.expect(jsonData.id).to.be.a(\"number\");\n    pm.environment.set(\"product_id\", jsonData.id);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/products/{{product_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "products",
+            "{{product_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Search Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/products/search?q=phone",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "products",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "phone"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Products",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Extract and store the product ID\nconst jsonData = pm.response.json();\n\npm.test(\"Product ID is present\", function () {\n    pm.expect(jsonData.products[0].id).to.be.a(\"number\");\n    pm.environment.set(\"product_id\", jsonData.products[0].id);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/products",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Cart",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const jsonData = pm.response.json();\n\npm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});\n\npm.test(\"Cart has products\", function () {\n    pm.expect(jsonData.products).to.be.an(\"array\").that.is.not.empty;\n    pm.expect(jsonData.totalProducts).to.be.above(0);\n});\n\n// Extract and save the cart ID\npm.environment.set(\"cart_id\", jsonData.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n\"userId\": 1,\r\n    \"products\": [\r\n      {\r\n        \"id\": {{product_id}},\r\n        \"quantity\": 4\r\n      },\r\n      {\r\n        \"id\": {{product_id}},\r\n        \"quantity\": 1\r\n      }\r\n    ]\r\n\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/carts/add",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "carts",
+            "add"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Cart Details",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const jsonData = pm.response.json();\n\npm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Cart total is valid\", function () {\n    pm.expect(jsonData.total).to.be.a(\"number\").and.above(0);\n});\n\npm.test(\"Cart contains Marni Red & white Suit\", function () {\n    const product = jsonData.products.find(p => p.title === \"Marni Red & white Suit\");\n    pm.expect(product, \"Product not found in cart\").to.not.be.undefined;\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/carts/32",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "carts",
+            "32"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
